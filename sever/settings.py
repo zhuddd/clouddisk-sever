@@ -136,7 +136,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = (
-    BASE_DIR/"static",
+    BASE_DIR / "static",
 )
 STATIC_ROOT = os.path.join(BASE_DIR, 'collect_static')
 
@@ -175,7 +175,7 @@ SIMPLEUI_CONFIG = {
     'system_keep': False,
 
     # 用于菜单排序和过滤, 不填此字段为默认排序和全部显示。空列表[] 为全部不显示.
-    'menu_display': ['用户账户','文件管理','支付', '权限认证'],
+    'menu_display': ['用户账户', '文件管理', '支付', '权限认证'],
     # 首页设置
     'dynamic': False,
     'menus': [
@@ -187,6 +187,11 @@ SIMPLEUI_CONFIG = {
                     'name': '用户',
                     # 注意url按'/admin/应用名小写/模型名小写/'命名。
                     'url': '/admin/account/user/',
+                    'icon': 'fa fa-user'
+                },
+                {
+                    'name': '用户验证码',
+                    'url': '/admin/account/captcha/',
                     'icon': 'fa fa-user'
                 },
             ]

@@ -1,7 +1,11 @@
+import datetime
+import random
+
+from account.models import Captcha
 from utils.account import *
 
 from utils.MyResponse import MyResponse
-
+from utils.mail import send_mail
 
 
 def login(request):
@@ -39,3 +43,62 @@ def register(request):
     return rt
 
 
+def update_password(request):
+    if request.method == "POST":
+        try:
+            data = request.POST
+            email = data["email"]
+            password = encrypt_password(data["password"])
+            captcha = data["captcha"]
+            catpchaobj = Captcha.objects.filter(user__email=email, captcha=captcha)
+            if not catpchaobj.exists() or (
+                    datetime.datetime.now().timestamp() - catpchaobj[0].send_time.timestamp()) > 600:
+                return MyResponse.ERROR("验证码错误或已过期")
+            catpchaobj[0].delete()
+            account = get_account_by_email(email)
+            account.password = password
+            account.save()
+            rt = MyResponse.SUCCESS("ok")
+        except:
+            rt = MyResponse.ERROR("error")
+    else:
+        rt = MyResponse.ERROR("请求参数错误")
+    return rt
+
+
+def get_captcha(request):
+    if request.method == "GET":
+        MyResponse.ERROR('error')
+    mail = request.POST.get('email')
+    if mail == None:
+        return MyResponse.ERROR('error')
+    userobj = User.objects.filter(email=mail)
+    if not userobj.exists():
+        return MyResponse.ERROR('用户不存在')
+    userobj = userobj[0]
+    captchaobj = Captcha.objects.filter(user=userobj)
+    code = random.randint(100000, 999999)
+    t = datetime.datetime.now()
+    if captchaobj.exists():
+        captchaobj = captchaobj[0]
+        if (t.timestamp() - captchaobj.send_time.timestamp()) < 60:
+            return MyResponse.ERROR('60秒内只能发送一次')
+        captchaobj.captcha = code
+        captchaobj.send_time = datetime.datetime.now()
+        captchaobj.save()
+    else:
+        captchaobj = Captcha()
+        captchaobj.user = userobj
+        captchaobj.captcha = code
+        captchaobj.send_time = t
+        captchaobj.save()
+
+    send_mail([mail],
+              'Account',
+              f'验证码',
+              f'您的验证码是:{code}，10分钟内有效。\n\n '
+              f'如非本人操作，请忽略本邮件。\n\n '
+              f'本邮件由系统自动发出，请勿直接回复！\n\n'
+              f'{t}'
+              )
+    return MyResponse.SUCCESS("ok")
