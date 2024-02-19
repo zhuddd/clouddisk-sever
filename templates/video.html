@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }}</title>
+</head>
+<body>
+<div id="mse" ></div>
+{#<video  controls="controls"  src="{{ url }}" style="width: 100%;"></video>#}
+</body>
+<script src="//unpkg.byted-static.com/xgplayer/2.31.2/browser/index.js" type="text/javascript"></script>
+<script>
+    let player = new Player({
+        id: 'mse',
+        url: '{{ url }}',
+        poster: '{{ poster }}',
+        videoInit: true,
+        playbackRate: [0.5, 0.75, 1, 1.5, 2],
+        width: window.innerWidth,
+        height: window.innerHeight,
+        lang: 'zh-cn',
+        fluid: true,
+    });
+</script>
+</html>
