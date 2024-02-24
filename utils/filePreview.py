@@ -103,9 +103,4 @@ async def all_preview(request, user_id, file_id):
     return resp
 
 
-async def preview_poster(user, file_id):
-    name, file_hash = await fileInfo(user, file_id)
-    path = settings.STATIC_FILES_DIR_FACE / f'{file_hash}.preview'
-    if not os.path.exists(path):
-        return FileResponse()
-    return FileResponse(open(path, 'rb'))
+

@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path("filedir/<int:t>/<str:msg>", views.filedir),
+    path("folderlist", views.folderList),
     path("used", views.usedStorage),
     path("delete", views.delete),
     path("rename", views.rename),

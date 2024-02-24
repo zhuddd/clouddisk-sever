@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "upload",
     "download",
     "pay",
+    "sharefile"
     # "debug_toolbar"
 ]
 
@@ -211,6 +212,12 @@ SIMPLEUI_CONFIG = {
                     # 注意url按'/admin/应用名小写/模型名小写/'命名。
                     'url': '/admin/file/files/',
                     'icon': 'fa fa-file'
+                },
+                {
+                    'name': '文件分享',
+                    # 注意url按'/admin/应用名小写/模型名小写/'命名。
+                    'url': '/admin/sharefile/sharelist/',
+                    'icon': 'fa fa-share'
                 },
             ]
         },

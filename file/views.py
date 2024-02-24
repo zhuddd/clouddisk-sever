@@ -1,15 +1,19 @@
+import os
+from datetime import datetime
+
 from asgiref.sync import sync_to_async
 from django.http import FileResponse
 from django.shortcuts import render
 
 from file.models import FileUser
+from sever import settings
+from sharefile.models import ShareList
 from utils import file, Face, KV
 from utils.MyResponse import MyResponse
 from sever.settings import STATIC_FILES_DIR_FACE
-from utils.LoginCheck import LoginCheck, AsyncLoginCheck
-from utils.account import get_user_by_session
+from utils.LoginCheck import LoginCheck
 from utils.file import file_copy, file_delete, getUsedStorage, gettotalSize
-from utils.filePreview import all_preview, preview_box, preview_poster
+from utils.filePreview import all_preview, preview_box, fileInfo
 
 
 @LoginCheck
@@ -23,6 +27,17 @@ def filedir(request, t, msg):
         user_id = request.user_id
         # user_id = 1
         data = file.get_file_user_list(user_id, t, msg)
+        return MyResponse.SUCCESS(data)
+    else:
+        return MyResponse.ERROR("请求方式错误")
+
+@LoginCheck
+def folderList(request):
+    if request.method == "GET":
+        user_id = request.user_id
+        # user_id = 1
+        data = FileUser.objects.filter(user_id=user_id, is_delete=False, is_uploaded=True, is_folder=True)
+        data = [{"id": i.id, "name": i.file_name, "parent": i.parent_folder} for i in data]
         return MyResponse.SUCCESS(data)
     else:
         return MyResponse.ERROR("请求方式错误")
@@ -166,8 +181,8 @@ def getPreviewKey(request):
         return MyResponse.ERROR("请求方式错误")
     try:
         user_id = request.user_id
-        file_id=request.GET["file_id"]
-        key = KV.newKey({"user_id": user_id,"file_id":file_id}, 60*60*24)
+        file_id = request.GET["file_id"]
+        key = KV.newKey({"user_id": user_id, "file_id": file_id}, 60 * 60 * 24)
         return MyResponse.SUCCESS(key)
     except Exception as e:
         print(e)
@@ -178,48 +193,45 @@ async def preview(request, k):
     """预览文件"""
 
     try:
-        s=KV.getKey(k)
-        user_id=s["user_id"]
-        file_id=s["file_id"]
-        return await preview_box(request, user_id,file_id,k)
+        s = KV.getKey(k)
+        user_id = s["user_id"]
+        file_id = s["file_id"]
+        return await preview_box(request, user_id, file_id, k)
     except Exception as e:
         print(e)
         return (
             render(request, 'urllose.html'))
 
+
 async def data(request, k):
     """以流媒体的方式响应视频文件"""
     try:
-        s=KV.getKey(k)
+        s = KV.getKey(k)
         if s is None:
             return MyResponse.ERROR("参数错误")
-        k=s["user_id"]
-        f=s["file_id"]
+        k = s["user_id"]
+        f = s["file_id"]
         return await all_preview(request, k, f)
     except Exception as e:
         print(e)
         return MyResponse.ERROR("参数错误")
 
+
 async def poster(request, k):
-    """以流媒体的方式响应视频文件"""
     try:
-        s=KV.getKey(k)
-        if s is None:
-            return MyResponse.ERROR("参数错误")
-        k=s["user_id"]
-        f=s["file_id"]
-        return await preview_poster(k, f)
+        s = await sync_to_async(KV.getKey)(k)
+        if s.get("user_id") is not None and s.get("file_id") is not None:
+            k = s["user_id"]
+            f = s["file_id"]
+            name, file_hash = await sync_to_async(fileInfo)(k, f)
+        else:
+            share = await sync_to_async(ShareList.objects.get)(share_code=k, is_delete=False, share_end_time__gte=datetime.now())
+            file_hash = await sync_to_async(lambda :share.file.file.hash)()
+            name=share.file.file_name
+        path = settings.STATIC_FILES_DIR_FACE / f'{file_hash}.preview'
+        if not os.path.exists(path):
+            return FileResponse()
+        return FileResponse(open(path, 'rb'), filename=f'{name}.png')
     except Exception as e:
-        print(e)
+        print("/file/poster， error", e)
         return FileResponse()
-
-
-def t(request):
-    s = KV.newKey({"a": 1, "b": 2, "c": 3}, 0)
-    return MyResponse.SUCCESS({"k": s[0], "v": s[1]})
-
-
-def t2(request, k):
-    s = KV.getKey(k)
-    print(s.values())
-    return MyResponse.SUCCESS({"k": "s.__dict__", "v": s.get_expiry_age()})

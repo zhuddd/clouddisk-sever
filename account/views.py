@@ -99,6 +99,6 @@ def get_captcha(request):
               f'您的验证码是:{code}，10分钟内有效。\n\n '
               f'如非本人操作，请忽略本邮件。\n\n '
               f'本邮件由系统自动发出，请勿直接回复！\n\n'
-              f'{t}'
+              f'{t.strftime("%Y-%m-%d %H:%M:%S")}'
               )
     return MyResponse.SUCCESS("ok")

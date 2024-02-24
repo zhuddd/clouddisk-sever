@@ -24,7 +24,7 @@ class Files(models.Model):
 
 class FileUser(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="用户id")
-    file = models.ForeignKey(Files, on_delete=models.CASCADE, verbose_name="目标文件", null=True)
+    file = models.ForeignKey(Files, on_delete=models.SET_NULL, verbose_name="目标文件", null=True)
     file_face = models.BooleanField(verbose_name="是否有文件封面", null=True)
     file_name = models.CharField(max_length=255, verbose_name="文件名")
     file_type = models.CharField(max_length=64, verbose_name="文件类型")

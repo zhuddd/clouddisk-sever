@@ -15,16 +15,33 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import FileResponse
+from django.shortcuts import render
 from django.urls import path, include
 
+from sever import settings
+
+
+def index(request):
+    return render(request, "index.html")
+
+def download(request):
+    return FileResponse(open(settings.BASE_DIR/"static"/"download_test", "rb"))
+
 urlpatterns = [
+    path("", index),
+    path("index", index),
+    path("download",download),
     path("admin/", admin.site.urls),
-    path("account/",include("account.urls")),
-    path("file/",include("file.urls")),
+    path("account/", include("account.urls")),
+    path("file/", include("file.urls")),
     path("upload/", include("upload.urls")),
     path("download/", include("download.urls")),
     path("pay/", include("pay.urls")),
+    path("share/", include("sharefile.urls")),
 ]
+
+
 # if "debug_toolbar" in settings.INSTALLED_APPS:
 #     import debug_toolbar
 #     urlpatterns = [
