@@ -116,7 +116,7 @@ def get_file_user_list(user_id,find_type, msg ):
 def file_copy(user_id, file_id, parent_folder):
     from file.models import FileUser
     try:
-        file = FileUser.objects.get(user_id=user_id, id=file_id, is_delete=False, is_uploaded=True)
+        file = FileUser.objects.get(id=file_id, is_delete=False, is_uploaded=True)
         usedSize = getUsedStorage(user_id)
         totalSize = gettotalSize(user_id)
         size = file.file.size if file.file else 0
@@ -127,7 +127,7 @@ def file_copy(user_id, file_id, parent_folder):
                                            user_id=user_id,
                                            is_uploaded=True)
         if file.is_folder:
-            for i in FileUser.objects.filter(user_id=user_id, parent_folder=file_id, is_delete=False,
+            for i in FileUser.objects.filter(parent_folder=file_id, is_delete=False,
                                              is_uploaded=True):
                 code = file_copy(user_id, i.id, new_file.id)
                 if code in [0, -1]:

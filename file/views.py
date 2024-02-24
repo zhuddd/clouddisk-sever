@@ -31,6 +31,7 @@ def filedir(request, t, msg):
     else:
         return MyResponse.ERROR("请求方式错误")
 
+
 @LoginCheck
 def folderList(request):
     if request.method == "GET":
@@ -150,10 +151,10 @@ def newfolder(request):
             parent = p[0].id
         else:
             parent = 0
-        FileUser.objects.create(file_face=False, file_name=name, file_type="folder",
-                                parent_folder=parent, is_folder=True, user_id=user_id,
-                                is_uploaded=True)
-        return MyResponse.SUCCESS("修改成功")
+        f = FileUser.objects.create(file_face=False, file_name=name, file_type="folder",
+                                    parent_folder=parent, is_folder=True, user_id=user_id,
+                                    is_uploaded=True)
+        return MyResponse.SUCCESS(f.id)
     except:
         return MyResponse.ERROR("请求参数错误")
 
@@ -225,12 +226,18 @@ async def poster(request, k):
             f = s["file_id"]
             name, file_hash = await sync_to_async(fileInfo)(k, f)
         else:
-            share = await sync_to_async(ShareList.objects.get)(share_code=k, is_delete=False, share_end_time__gte=datetime.now())
-            file_hash = await sync_to_async(lambda :share.file.file.hash)()
-            name=share.file.file_name
+            share = await sync_to_async(ShareList.objects.get)(share_code=k, is_delete=False,
+                                                               share_end_time__gte=datetime.now())
+            try:
+                file_hash = await sync_to_async(lambda: share.file.file.hash)()
+            except:
+                file_hash = ""
+            name = share.file.file_name
         path = settings.STATIC_FILES_DIR_FACE / f'{file_hash}.preview'
         if not os.path.exists(path):
-            return FileResponse()
+            file_type = await sync_to_async(lambda: share.file.file_type)()
+            return FileResponse(open(settings.BASE_DIR / "static" / "img" / f'{file_type}.svg', 'rb'),
+                                filename=f'{file_type}.svg')
         return FileResponse(open(path, 'rb'), filename=f'{name}.png')
     except Exception as e:
         print("/file/poster， error", e)
