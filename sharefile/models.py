@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import localtime
 
 from account.models import User
 from file.models import FileUser
@@ -21,8 +22,12 @@ class ShareList(models.Model):
 
     def dict(self) -> dict:
         return {"Id": self.id, "user_id": self.user.id, "file_id": self.file.id, "share_code": self.share_code,
-                "share_pwd": self.share_pwd, "share_time": self.share_time.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "share_end_time": self.share_end_time.now().strftime("%Y-%m-%d %H:%M:%S")}
+                "share_pwd": self.share_pwd, "share_time": localtime(self.share_time).strftime("%Y-%m-%d %H:%M:%S"),
+                "share_end_time": localtime(self.share_end_time).strftime("%Y-%m-%d %H:%M:%S")}
+
+    def list(self):
+        return [self.file.file_name, self.file.file_type, localtime(self.share_time).strftime("%Y-%m-%d %H:%M:%S"),
+                localtime(self.share_end_time).strftime("%Y-%m-%d %H:%M:%S"), self.share_code, self.share_pwd]
 
     def __str__(self):
         return f"{self.id}|{self.share_code}"

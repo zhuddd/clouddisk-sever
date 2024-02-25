@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils.timezone import localtime
+
 
 # Create your models here.
 class User(models.Model):
@@ -9,7 +11,7 @@ class User(models.Model):
 
     def dict(self):
         return {"Id": self.id, "Email": self.email, "Password": self.password,
-                "RegistrationTime": self.registration_time}
+                "RegistrationTime": localtime(self.registration_time)}
 
     def __str__(self):
         return f"{self.email}"
@@ -24,7 +26,7 @@ class Captcha(models.Model):
     send_time = models.DateTimeField(auto_now_add=True, verbose_name="发送时间")
 
     def dict(self):
-        return {"Email": self.user.email, "Captcha": self.captcha, "SendTime": self.send_time}
+        return {"Email": self.user.email, "Captcha": self.captcha, "SendTime": localtime(self.send_time)}
 
     def __str__(self):
         return f"{self.user} {self.captcha}"

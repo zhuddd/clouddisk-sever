@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import localtime
 
 # Create your models here.
 from account.models import User
@@ -37,8 +38,9 @@ class FileUser(models.Model):
     def dict(self) -> dict:
         return dict({"Id": self.id, "file_name": self.file_name, "file_type": self.file_type,
                      "user_id": self.user.id, "parent_folder": self.parent_folder, "is_folder": self.is_folder,
-                     "is_delete": self.is_delete, "file_face": self.file_face, "upload_time": self.upload_time.now().strftime("%Y-%m-%d %H:%M:%S"),
-                     "size":self.file.size if self.file else 0})
+                     "is_delete": self.is_delete, "file_face": self.file_face,
+                     "upload_time": localtime(self.upload_time).strftime("%Y-%m-%d %H:%M:%S"),
+                     "size": self.file.size if self.file else 0})
 
     def tree_dict(self) -> dict:
         return dict(

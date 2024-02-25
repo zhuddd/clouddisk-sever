@@ -6,5 +6,7 @@ urlpatterns = [
     path("new", views.newShare),
     path("get/<str:code>", views.getShare),
     path("save", views.shareSave),
+    path("list", views.shareList),
+    path("delete", views.shareDelete),
 
 ]

@@ -1,4 +1,5 @@
 from django.db import models
+from django.templatetags.tz import localtime
 from mdeditor.fields import MDTextField
 
 from account.models import User
@@ -20,7 +21,8 @@ class Menu(models.Model):
         (1024 * 1024 * 1024, 'GB'),
         (1024 * 1024 * 1024 * 1024, 'TB'),
     )
-    storage_unit = models.BigIntegerField(choices=STORAGE_UNIT_CHOICES, default=1024 * 1024 *1024, verbose_name='存储单位')
+    storage_unit = models.BigIntegerField(choices=STORAGE_UNIT_CHOICES, default=1024 * 1024 * 1024,
+                                          verbose_name='存储单位')
     price = models.IntegerField(verbose_name='价格 (单位：分)')
     max_num = models.IntegerField(verbose_name='单用户限制次数', default=-1)
     valid_time = models.IntegerField(verbose_name='有效时间 (-1永久有效)', default=-1)
@@ -33,7 +35,7 @@ class Menu(models.Model):
     def dict(self):
         return {"Id": self.id, "Title": self.title, "StorageSize": self.storage_size,
                 "storage_unit": self.storage_unit, "Price": self.price, "ValidTime": self.valid_time,
-                "StartTime": self.start_time,"EndTime": self.end_time}
+                "StartTime": localtime(self.start_time), "EndTime": localtime(self.end_time)}
 
     class Meta:
         verbose_name = "订阅"
@@ -53,14 +55,14 @@ class UserOrders(models.Model):
     call_back = models.TextField(verbose_name="回调数据", null=True)
 
     def __str__(self):
-        return f"用户订单{self.id} 用户{self.user} 订阅{self.menu} 订阅时间{self.order_time} 是否支付{self.is_pay} "
+        return f"用户订单{self.id} 用户{self.user} 订阅{self.menu} 订阅时间{localtime(self.order_time).strftime('%Y-%m-%d %H:%M:%S')} 是否支付{self.is_pay} "
 
     def dict(self):
         return {"Id": self.id, "UserId": self.user.id, "MenuId": self.menu.id,
-                "OrderTime": self.order_time.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "OrderTime": localtime(self.order_time).strftime("%Y-%m-%d %H:%M:%S"),
                 "IsPay": self.is_pay,
-                "PayTime": self.pay_time.now().strftime("%Y-%m-%d %H:%M:%S") if self.pay_time else None,
-                "ValidTime": self.valid_time.now().strftime("%Y-%m-%d %H:%M:%S") if self.valid_time else None,
+                "PayTime": localtime(self.pay_time).strftime("%Y-%m-%d %H:%M:%S") if self.pay_time else None,
+                "ValidTime": localtime(self.valid_time).strftime("%Y-%m-%d %H:%M:%S") if self.valid_time else None,
                 "IsValid": self.is_valid, "IsDelete": self.is_delete}
 
     class Meta:

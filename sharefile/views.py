@@ -71,7 +71,6 @@ def shareSave(request):
         else:
             parent = 0
         share = ShareList.objects.get(share_code=code, is_delete=False, share_end_time__gte=datetime.now(), share_pwd=pwd)
-        print("share.file.file_id", share.file.id)
         p = parent
         while p != 0:
             if p == share.file.id:
@@ -86,3 +85,22 @@ def shareSave(request):
             return MyResponse.ERROR("保存失败")
     except:
         return MyResponse.ERROR("保存失败")
+
+@LoginCheck
+def shareList(request):
+    user_id = request.user_id
+    data = ShareList.objects.filter(user_id=user_id, is_delete=False)
+    r=[i.list() for i in data]
+    return MyResponse.SUCCESS(r)
+
+@LoginCheck
+def shareDelete(request):
+    user_id = request.user_id
+    code = request.POST["code"]
+    try:
+        share = ShareList.objects.get(user_id=user_id, share_code=code, is_delete=False)
+        share.is_delete = True
+        share.save()
+        return MyResponse.SUCCESS("删除成功")
+    except:
+        return MyResponse.ERROR("删除失败")
