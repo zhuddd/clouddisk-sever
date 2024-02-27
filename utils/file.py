@@ -36,6 +36,8 @@ def get_file_from_model(file_hash, check_hash, size):
     """
     通过文件的md5值获取文件
     :param file_hash: 文件的md5值
+    :param check_hash: 校验值
+    :param size: 文件的大小
     :return: 文件
     """
     from file.models import Files
@@ -70,8 +72,7 @@ def get_file_hash_file(file, key=""):
     """
     import hashlib
     m = hashlib.sha256(key.encode())
-    for chunk in file.chunks():
-        m.update(chunk)
+    m.update(file)
     return m.hexdigest()
 
 

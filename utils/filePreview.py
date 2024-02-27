@@ -101,6 +101,3 @@ async def all_preview(request, user_id, file_id):
         resp['Content-Length'] = str(size)
     resp['Accept-Ranges'] = 'bytes'
     return resp
-
-
-

@@ -224,7 +224,7 @@ async def poster(request, k):
         if s.get("user_id") is not None and s.get("file_id") is not None:
             k = s["user_id"]
             f = s["file_id"]
-            name, file_hash = await sync_to_async(fileInfo)(k, f)
+            name, file_hash =await fileInfo(k, f)
         else:
             share = await sync_to_async(ShareList.objects.get)(share_code=k, is_delete=False,
                                                                share_end_time__gte=datetime.now())
