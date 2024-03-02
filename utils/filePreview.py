@@ -53,15 +53,14 @@ async def preview_box(request: HttpRequest, user, file_id, k):
     if content_type is None:
         return render(request, 'previewError.html')
     type = content_type.split("/")[0]
-
-    if type in ("video", "audio"):
+    if type in ("video", "audio","image"):
         return render(request,
                       f'{type}.html',
                       {
-                          "url": f"./../data/{k}",
+                          "url": f"../data/{k}",
                           "type": content_type,
                           "name": name,
-                          "poster": f"./../poster/{k}"}
+                          "poster": f"../api/file/poster/{k}"}
                       )
     else:
         return render(request, 'previewError.html')

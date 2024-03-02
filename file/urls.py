@@ -11,8 +11,6 @@ urlpatterns = [
     path("newfolder", views.newfolder),
     path('face/<str:k>/<str:t>', views.getface),
     path('getkey/', views.getPreviewKey),
-    path("preview/<str:k>", views.preview),
-    path("data/<str:k>", views.data),
     path("poster/<str:k>", views.poster),
 
     # path("uploadold", views.upload),

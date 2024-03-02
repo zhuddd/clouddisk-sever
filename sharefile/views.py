@@ -50,7 +50,7 @@ def getShare(request, code):
         return render(request, "share_save.html", {
             "name": share.file.file_name,
             "link": link,
-            "poster": f"../../file/poster/{code}"})
+            "poster": f"../../api/file/poster/{code}"})
     except:
         return render(request, "share_lost.html")
 

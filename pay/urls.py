@@ -7,4 +7,6 @@ urlpatterns = [
     path('pay', views.pay),
     path('paysuccess', views.paysuccess),
     path('callback', views.callback),
+    path('admin', views.admin),
+    path('income', views.income),
     ]

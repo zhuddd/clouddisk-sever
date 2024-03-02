@@ -19,6 +19,8 @@
     <orderEntry type="library" name="video-js" level="application" />
     <orderEntry type="library" name="video" level="application" />
     <orderEntry type="library" name="index" level="application" />
+    <orderEntry type="library" name="echarts" level="application" />
+    <orderEntry type="library" name="jquery" level="application" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />

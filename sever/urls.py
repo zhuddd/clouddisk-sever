@@ -19,6 +19,8 @@ from django.http import FileResponse
 from django.shortcuts import render
 from django.urls import path, include
 
+import file
+from file import views
 from sever import settings
 
 
@@ -33,12 +35,15 @@ urlpatterns = [
     path("index", index),
     path("download",download),
     path("admin/", admin.site.urls),
-    path("account/", include("account.urls")),
-    path("file/", include("file.urls")),
-    path("upload/", include("upload.urls")),
-    path("download/", include("download.urls")),
-    path("pay/", include("pay.urls")),
+    path("api/account/", include("account.urls")),
+    path("api/file/", include("file.urls")),
+    path("api/upload/", include("upload.urls")),
+    path("api/download/", include("download.urls")),
+    path("api/pay/", include("pay.urls")),
     path("share/", include("sharefile.urls")),
+    path("preview/<str:k>", views.preview),
+    path("data/<str:k>", views.data),
+
 ]
 
 

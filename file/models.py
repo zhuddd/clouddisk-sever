@@ -13,7 +13,10 @@ class Files(models.Model):
     broken = models.BooleanField(verbose_name="是否损坏", default=True)
 
     def dict(self):
-        return {"Id": self.id, "hash": self.hash, "size": self.size, "broken": self.broken}
+        return {"Id": self.id,
+                "hash": self.hash,
+                "size": self.size,
+                "broken": self.broken}
 
     def __str__(self):
         return f"{self.id}"
@@ -36,16 +39,24 @@ class FileUser(models.Model):
     upload_time = models.DateTimeField(auto_now_add=True, verbose_name="上传时间")
 
     def dict(self) -> dict:
-        return dict({"Id": self.id, "fid": self.file.id if self.file else None, "file_name": self.file_name,
+        return dict({"Id": self.id,
+                     "fid": self.file.id if self.file else None,
+                     "file_name": self.file_name,
                      "file_type": self.file_type,
-                     "user_id": self.user.id, "parent_folder": self.parent_folder, "is_folder": self.is_folder,
-                     "is_delete": self.is_delete, "file_face": self.file_face,
+                     "user_id": self.user.id,
+                     "parent_folder": self.parent_folder,
+                     "is_folder": self.is_folder,
+                     "is_delete": self.is_delete,
+                     "file_face": self.file_face,
                      "upload_time": localtime(self.upload_time).strftime("%Y-%m-%d %H:%M:%S"),
                      "size": self.file.size if self.file else 0})
 
     def tree_dict(self) -> dict:
         return dict(
-            {"Id": self.id, "file_name": self.file_name, "file_type": self.file_type, "is_folder": self.is_folder})
+            {"Id": self.id,
+             "file_name": self.file_name,
+             "file_type": self.file_type,
+             "is_folder": self.is_folder})
 
     def __str__(self):
         return f"{self.id}|{self.file_name}"

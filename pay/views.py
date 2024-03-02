@@ -1,18 +1,17 @@
-import random
-import time
+from datetime import datetime, timedelta
 
-from alipay.aop.api.domain.AlipayTradePagePayModel import AlipayTradePagePayModel
 from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest
-from django.http import HttpResponse, HttpResponseRedirect
-
-from alipay.aop.api.AlipayClientConfig import AlipayClientConfig
+from django.contrib.admin.views.decorators import staff_member_required
 from alipay.aop.api.DefaultAlipayClient import DefaultAlipayClient
+from django.shortcuts import render
+from django.utils.timezone import localtime
 
 from pay.models import UserOrders, Menu
 from sever import settings
 from utils.LoginCheck import LoginCheck
 from utils.MyResponse import MyResponse
 from utils.aliPay import alipayConfig, alipayModel, check_pay, add_day
+
 
 @LoginCheck
 def getMenu(request):
@@ -29,6 +28,7 @@ def getMenu(request):
         r.append(menu.dict())
     return MyResponse.SUCCESS(r)
 
+
 def getInfo(request):
     data = request.GET
     menu_id = data.get("menu_id")
@@ -39,6 +39,7 @@ def getInfo(request):
     except:
         return MyResponse.ERROR("menu is not exist")
     return MyResponse.SUCCESS(menu.text)
+
 
 @LoginCheck
 def pay(request):
@@ -71,15 +72,16 @@ def pay(request):
         return MyResponse.ERROR("pay error")
     else:
         valid_time = f'{menu.valid_time}天' if menu.valid_time != -1 else "永久有效"
-        d={
+        d = {
             "id": order.id,
             "title": menu.title,
-            "info":f"容量：{menu.storage_size} {menu.get_storage_unit_display()} \n价格：{price} \n有效时间：{valid_time}",
-            "price":f'{float(menu.price) / 100:.2f}元',
+            "info": f"容量：{menu.storage_size} {menu.get_storage_unit_display()} \n价格：{price} \n有效时间：{valid_time}",
+            "price": f'{float(menu.price) / 100:.2f}元',
             "url": response_content
 
         }
         return MyResponse.SUCCESS(d)
+
 
 @LoginCheck
 def paysuccess(request):
@@ -87,7 +89,7 @@ def paysuccess(request):
     if not order_id:
         return MyResponse.ERROR("order_id is required")
     try:
-        order = UserOrders.objects.get(id=order_id,user_id=request.user_id)
+        order = UserOrders.objects.get(id=order_id, user_id=request.user_id)
         if order.is_pay:
             return MyResponse.SUCCESS(True)
         return MyResponse.SUCCESS(False)
@@ -115,3 +117,35 @@ def callback(request):
         return MyResponse.ERROR('')
     except Exception as e:
         return MyResponse.ERROR("error")
+
+
+@staff_member_required
+def admin(request):
+    return render(request, "pay.html")
+
+
+@staff_member_required
+def income(request):
+    before_7_day = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+    objs = UserOrders.objects.filter(is_pay=True, is_valid=True, pay_time__gte=before_7_day)
+    r = []
+    date = {}
+    menus = {}
+    menus2 = {}
+    for i in range(6, -1, -1):
+        t = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+        date[t] = 0
+    for obj in objs:
+        t = localtime(obj.order_time).strftime('%Y-%m-%d')
+        date[t] += obj.menu.price / 100
+        try:
+            menus[obj.menu.title] += obj.menu.price / 100
+            menus2[obj.menu.title] +=1
+        except:
+            menus[obj.menu.title] = obj.menu.price / 100
+            menus2[obj.menu.title] = 1
+    r.append([[k for k in date.keys()], [v for v in date.values()]])
+    r.append([{"name": f"{k}\n{v}元", "value": v} for k, v in menus.items()])
+    r.append([{"name": f"{k}\n{v}份", "value": v} for k, v in menus2.items()])
+
+    return MyResponse.SUCCESS(r)
