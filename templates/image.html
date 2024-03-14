@@ -5,24 +5,17 @@
     <title>{{ name }}</title>
     <style>
         #image {
-            max-width: 100%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            display: block;
+            -webkit-user-select: none;
+            margin: auto;
+            cursor: zoom-out;
+            background-color: hsl(0, 0%, 90%);
+            transition: background-color 300ms;
+            height: auto;
         }
     </style>
 </head>
 <body>
-    <img id="image" src="{{ url }}" alt="{{ name }}">
-    <script>
-        var img = document.getElementById('image');
-        img.onload = function() {
-            if (this.naturalWidth < window.innerWidth && this.naturalHeight < window.innerHeight) {
-                this.style.width = this.naturalWidth + 'px';
-            }
-        };
-        window.onresize = img.onload;
-    </script>
+<img id="image" src="{{ url }}" alt="{{ name }}">
 </body>
 </html>

@@ -21,7 +21,7 @@ def newShare(request):
     end_time = request.POST['end_time']
     pwd = request.POST['pwd']
     if end_time == "":
-        end_time = "9999-12-31 23:59:59"
+        end_time = None
     else:
         end_time = end_time + " 23:59:59"
     user = User.objects.get(id=user_id)
@@ -36,9 +36,12 @@ def newShare(request):
 
 def getShare(request, code):
     try:
-        share = ShareList.objects.get(share_code=code, is_delete=False, share_end_time__gte=datetime.now())
+        from django.db.models import Q
+        share = ShareList.objects.get(Q(share_end_time__gt=datetime.now()) | Q(share_end_time=None),
+                                      share_code=code,
+                                      is_delete=False)
 
-        password=""
+        password = ""
         if share.share_pwd is not None and share.share_pwd != "":
             if request.method == "GET":
                 return render(request, "share_save.html",
@@ -51,14 +54,17 @@ def getShare(request, code):
             "name": share.file.file_name,
             "link": link,
             "poster": f"../../api/file/poster/{code}"})
-    except:
+    except Exception as e:
+        print("getShare:",e)
         return render(request, "share_lost.html")
+
 
 @LoginCheck
 def shareSave(request):
     if request.method != "POST":
         return MyResponse.ERROR("请求方式错误")
     try:
+        from django.db.models import Q
         user_id = request.user_id
         code = request.POST["code"]
         parent_id = request.POST["parent"]
@@ -70,7 +76,9 @@ def shareSave(request):
             parent = p[0].id
         else:
             parent = 0
-        share = ShareList.objects.get(share_code=code, is_delete=False, share_end_time__gte=datetime.now(), share_pwd=pwd)
+        share = ShareList.objects.get(Q(share_end_time__gt=datetime.now()) | Q(share_end_time=None),
+                                      share_pwd=pwd,
+                                      share_code=code, is_delete=False, )
         p = parent
         while p != 0:
             if p == share.file.id:
@@ -86,12 +94,14 @@ def shareSave(request):
     except:
         return MyResponse.ERROR("保存失败")
 
+
 @LoginCheck
 def shareList(request):
     user_id = request.user_id
     data = ShareList.objects.filter(user_id=user_id, is_delete=False)
-    r=[i.list() for i in data]
+    r = [i.list() for i in data]
     return MyResponse.SUCCESS(r)
+
 
 @LoginCheck
 def shareDelete(request):

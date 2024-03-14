@@ -14,8 +14,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 from django.urls import path, include
 
@@ -27,13 +28,19 @@ from sever import settings
 def index(request):
     return render(request, "index.html")
 
+
 def download(request):
-    return FileResponse(open(settings.BASE_DIR/"static"/"download_test", "rb"))
+    return FileResponse(open(settings.BASE_DIR / "static" / "download_test", "rb"))
+
+
+
+
 
 urlpatterns = [
     path("", index),
     path("index", index),
-    path("download",download),
+    path("download", download),
+    path(r'mdeditor/', include('mdeditor.urls')),
     path("admin/", admin.site.urls),
     path("api/account/", include("account.urls")),
     path("api/file/", include("file.urls")),
@@ -45,7 +52,9 @@ urlpatterns = [
     path("data/<str:k>", views.data),
 
 ]
-
+if settings.DEBUG:
+    # static files (images, css, javascript, etc.)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # if "debug_toolbar" in settings.INSTALLED_APPS:
 #     import debug_toolbar

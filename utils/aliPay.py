@@ -1,5 +1,6 @@
 from alipay.aop.api.AlipayClientConfig import AlipayClientConfig
 from alipay.aop.api.domain.AlipayTradePagePayModel import AlipayTradePagePayModel
+from alipay.aop.api.domain.AlipayTradeRefundModel import AlipayTradeRefundModel
 from alipay.aop.api.util.SignatureUtils import verify_with_rsa
 
 from sever import settings
@@ -24,11 +25,25 @@ def alipayModel(orderNo: int, totalAmount: str, subject: str):
     '''
     model = AlipayTradePagePayModel()
     model.out_trade_no = orderNo  # 商户订单号，商户网站订单系统中唯一订单号，必填
-    model.total_amount = totalAmount;  # 订单总金额，单位为元，精确到小数点后两位
-    model.subject = subject;  # 订单标题
-    model.qr_pay_mode = "4";  # 扫码支付请求必须
-    model.product_code = "FAST_INSTANT_TRADE_PAY";  # 电脑网站支付请求必须
+    model.total_amount = totalAmount  # 订单总金额，单位为元，精确到小数点后两位
+    model.subject = subject  # 订单标题
+    # model.qr_pay_mode = "0"  # 扫码支付请求必须
+    model.product_code = "FAST_INSTANT_TRADE_PAY"  # 电脑网站支付请求必须
     model.timeout_express = "5m"  # 订单过期时间
+    return model
+
+def refundModel(orderNo: int, refundAmount: str, refundReason: str):
+    '''
+    退款参数
+    :param orderNo: 订单号
+    :param refundAmount: 退款金额，单位为元，精确到小数点后两位
+    :param refundReason: 退款原因
+    :return:
+    '''
+    model = AlipayTradeRefundModel()
+    model.out_trade_no = orderNo  # 商户订单号，商户网站订单系统中唯一订单号，必填
+    model.refund_amount = refundAmount  # 退款金额，单位为元，精确到小数点后两位
+    model.refund_reason = refundReason  # 退款原因
     return model
 
 
@@ -45,7 +60,6 @@ def check_pay(params):  # 定义检查支付结果的函数
         return False
 
 
-
 def add_day(date_string, days):
     from datetime import datetime, timedelta
     # 将字符串转换为datetime对象
@@ -56,17 +70,3 @@ def add_day(date_string, days):
     return new_date_time.strftime('%Y-%m-%d %H:%M:%S')
 
 
-
-
-
-# t = {'gmt_create': '2024-02-02 14:15:48', 'charset': 'utf-8', 'gmt_payment': '2024-02-02 14:15:53',
-#      'notify_time': '2024-02-02 14:15:54', 'subject': 't1',
-#      'sign': 'DpRrXL1tfA1gozY6cKYktstNZXP4/qlsmPUx1aqbcnysz5+S/z2O634rSHxr6mmcSanL92D7kq+g6GPzEGDfh5Z8R5ONOb8lAmkK4ksYkEiaeBR0P0NlKNFx280i99EgdEQ/YuSj3Mx4IXHrx+P2uf7xb7lKWxRMgt0TYw+2TB8HyJhiVzz4lkz92C1CdnbB1hygF2+utosKaCiKCaR39F/9Pzj389Uic0aeSWPGkUXX4ETy1H9YgrdI/wOzcg/3M9D9QP4TrOqstNIH9p3fxV0OjA7Grq7HNs0hZSzx5X1Xhvz6cHAD37J1SljKvoQSajYalMb96BD/RjD+6xuKgA==',
-#      'buyer_id': '2088722004564053', 'invoice_amount': '11.11', 'version': '1.0',
-#      'notify_id': '2024020201222141554064050502132169',
-#      'fund_bill_list': '[{"amount":"11.11","fundChannel":"ALIPAYACCOUNT"}]', 'notify_type': 'trade_status_sync',
-#      'out_trade_no': '11', 'total_amount': '11.11', 'trade_status': 'TRADE_SUCCESS',
-#      'trade_no': '2024020222001464050502015929', 'auth_app_id': '9021000122694907', 'receipt_amount': '11.11',
-#      'point_amount': '0.00', 'buyer_pay_amount': '11.11', 'app_id': '9021000122694907', 'sign_type': 'RSA2',
-#      'seller_id': '2088721004563495'}
-# print(check_pay(t))

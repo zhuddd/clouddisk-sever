@@ -1,6 +1,8 @@
+import json
 from datetime import datetime, timedelta
 
 from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest
+from alipay.aop.api.request.AlipayTradeRefundRequest import AlipayTradeRefundRequest
 from django.contrib.admin.views.decorators import staff_member_required
 from alipay.aop.api.DefaultAlipayClient import DefaultAlipayClient
 from django.shortcuts import render
@@ -10,7 +12,7 @@ from pay.models import UserOrders, Menu
 from sever import settings
 from utils.LoginCheck import LoginCheck
 from utils.MyResponse import MyResponse
-from utils.aliPay import alipayConfig, alipayModel, check_pay, add_day
+from utils.aliPay import alipayConfig, alipayModel, check_pay, add_day, refundModel
 
 
 @LoginCheck
@@ -43,7 +45,6 @@ def getInfo(request):
 
 @LoginCheck
 def pay(request):
-    # 实例化客户端
     data = request.GET
     # user_id = 1
     user_id = request.user_id
@@ -61,8 +62,6 @@ def pay(request):
     model = alipayModel(order.id, price, menu.title)
     payrequest = AlipayTradePagePayRequest(biz_model=model)
     payrequest.notify_url = settings.CALLBACK  # 通知地址
-    # 执行API调用
-    response_content = False
     try:
         client = DefaultAlipayClient(alipay_client_config)
         response_content = client.page_execute(payrequest, http_method="GET")
@@ -99,22 +98,42 @@ def paysuccess(request):
 
 def callback(request):
     try:
-        if request.method == 'POST':
-            params = request.POST.dict()  # 获取参数字典
-            if check_pay(params):
-                order = UserOrders.objects.get(id=params["out_trade_no"])
-                order.trade_no = params["trade_no"]
-                order.is_pay = True
-                order.pay_time = params["gmt_payment"]
-                if order.menu.valid_time > 0:
-                    order.valid_time = add_day(params["gmt_payment"], order.menu.valid_time)
+        if request.method != 'POST':
+            return MyResponse.ERROR("error")
+        params = request.POST.dict()  # 获取参数字典
+        if not check_pay(params):
+            return MyResponse.ERROR('')
+        order = UserOrders.objects.get(id=params["out_trade_no"])
+        menu = order.menu
+        user = order.user
+        order.trade_no = params["trade_no"]
+        order.is_pay = True
+        order.pay_time = params["gmt_payment"]
+        if order.menu.valid_time > 0:
+            order.valid_time = add_day(params["gmt_payment"], order.menu.valid_time)
+        else:
+            order.valid_time = order.menu.end_time
+        order_len = UserOrders.objects.filter(user=user, menu=menu, is_valid=True).count()
+        if 0 < menu.max_num <= order_len:
+            order.is_valid = False
+            alipay_client_config = alipayConfig()
+            refund_model = refundModel(order.id, f'{float(menu.price) / 100:.2f}', "购买次数超限")
+            refund_request = AlipayTradeRefundRequest(biz_model=refund_model)
+            client = DefaultAlipayClient(alipay_client_config)
+            res = client.execute(refund_request)
+            try:
+                res = json.loads(res)
+                if res['msg'] == 'Success':
+                    order.refund = True
                 else:
-                    order.valid_time = order.menu.end_time
-                order.is_valid = True
-                order.call_back = str(params)
-                order.save()
-                return MyResponse.SUCCESS('success')
-        return MyResponse.ERROR('')
+                    order.refund = False
+            except:
+                order.refund = False
+        else:
+            order.is_valid = True
+        order.call_back = str(params)
+        order.save()
+        return MyResponse.SUCCESS('success')
     except Exception as e:
         return MyResponse.ERROR("error")
 
@@ -126,7 +145,7 @@ def admin(request):
 
 @staff_member_required
 def income(request):
-    before_7_day = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+    before_7_day = (datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d')
     objs = UserOrders.objects.filter(is_pay=True, is_valid=True, pay_time__gte=before_7_day)
     r = []
     date = {}
@@ -139,13 +158,13 @@ def income(request):
         t = localtime(obj.order_time).strftime('%Y-%m-%d')
         date[t] += obj.menu.price / 100
         try:
-            menus[obj.menu.title] += obj.menu.price / 100
-            menus2[obj.menu.title] +=1
+            menus[obj.menu.title] += obj.menu.price
+            menus2[obj.menu.title] += 1
         except:
-            menus[obj.menu.title] = obj.menu.price / 100
+            menus[obj.menu.title] = obj.menu.price
             menus2[obj.menu.title] = 1
     r.append([[k for k in date.keys()], [v for v in date.values()]])
-    r.append([{"name": f"{k}\n{v}元", "value": v} for k, v in menus.items()])
+    r.append([{"name": f"{k}\n{v / 100:.2f}元", "value": v} for k, v in menus.items()])
     r.append([{"name": f"{k}\n{v}份", "value": v} for k, v in menus2.items()])
 
     return MyResponse.SUCCESS(r)

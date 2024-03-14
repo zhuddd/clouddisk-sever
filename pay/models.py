@@ -56,6 +56,7 @@ class UserOrders(models.Model):
     pay_time = models.DateTimeField(verbose_name="支付时间", null=True)
     valid_time = models.DateTimeField(verbose_name="有效时间", null=True)
     is_valid = models.BooleanField(verbose_name="是否有效", default=False)
+    refund = models.BooleanField(verbose_name="是否退款", default=False)
     is_delete = models.BooleanField(verbose_name="是否删除", default=False)
     call_back = models.TextField(verbose_name="回调数据", null=True)
 
@@ -71,7 +72,8 @@ class UserOrders(models.Model):
                 "PayTime": localtime(self.pay_time).strftime("%Y-%m-%d %H:%M:%S") if self.pay_time else None,
                 "ValidTime": localtime(self.valid_time).strftime("%Y-%m-%d %H:%M:%S") if self.valid_time else None,
                 "IsValid": self.is_valid,
-                "IsDelete": self.is_delete}
+                "IsDelete": self.is_delete,
+                "refund": self.refund}
 
     class Meta:
         verbose_name = "用户订单"

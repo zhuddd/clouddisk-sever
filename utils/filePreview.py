@@ -99,4 +99,5 @@ async def all_preview(request, user_id, file_id):
         resp = FileResponse(open(path, "rb"), content_type=content_type)
         resp['Content-Length'] = str(size)
     resp['Accept-Ranges'] = 'bytes'
+    resp['Content-Disposition'] = f'attachment; filename="{name}"'
     return resp

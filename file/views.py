@@ -226,8 +226,7 @@ async def poster(request, k):
             f = s["file_id"]
             name, file_hash = await fileInfo(k, f)
         else:
-            share = await sync_to_async(ShareList.objects.get)(share_code=k, is_delete=False,
-                                                               share_end_time__gte=datetime.now())
+            share = await sync_to_async(ShareList.objects.get)(share_code=k, is_delete=False)
             try:
                 file_hash = await sync_to_async(lambda: share.file.file.hash)()
             except:
@@ -242,3 +241,11 @@ async def poster(request, k):
     except Exception as e:
         print("/file/poster， error", e)
         return FileResponse()
+
+
+
+
+
+
+
+

@@ -173,7 +173,7 @@ def gettotalSize(user_id):
     try:
         now = datetime.now()
         default = User.objects.get(id=user_id).total_size
-        orders = UserOrders.objects.filter(user_id=user_id, is_pay=True, valid_time__gte=now)
+        orders = UserOrders.objects.filter(user_id=user_id, is_pay=True, valid_time__gte=now, is_valid=True)
         for i in orders:
             default += i.menu.storage_size * i.menu.storage_unit
         return default

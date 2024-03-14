@@ -147,7 +147,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'collect_static')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 # 自定义配置
 ## 文件目录
 STATIC_FILES_DIR = BASE_DIR / "filedata"
