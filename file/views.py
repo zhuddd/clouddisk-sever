@@ -9,6 +9,7 @@ from file.models import FileUser
 from sever import settings
 from sharefile.models import ShareList
 from utils import file, Face, KV
+from utils.CommonLog import log
 from utils.MyResponse import MyResponse
 from sever.settings import STATIC_FILES_DIR_FACE
 from utils.LoginCheck import LoginCheck
@@ -59,6 +60,7 @@ def getface(request, k, t):
         else:
             return FileResponse()
     except:
+        log.waring(f"获取/生成文件封面失败，文件id：{k}")
         user_file.file_face = False
         user_file.save()
         return FileResponse()
@@ -79,6 +81,7 @@ def delete(request):
         else:
             return MyResponse.ERROR("删除失败")
     except:
+        log.warning(f"用户尝试删除文件失败，用户id：{request.user_id},{request.POST}")
         return MyResponse.ERROR("请求参数错误")
 
 
@@ -98,6 +101,7 @@ def rename(request):
         file.save()
         return MyResponse.SUCCESS("修改成功")
     except:
+        log.warning(f"用户尝试重命名文件失败，用户id：{request.user_id},{request.POST}")
         return MyResponse.ERROR("请求参数错误")
 
 
@@ -133,6 +137,7 @@ def paste(request):
         else:
             return MyResponse.ERROR("修改失败")
     except:
+        log.warning(f"用户尝试粘贴文件失败，用户id：{request.user_id},{request.POST}")
         return MyResponse.ERROR("请求参数错误")
 
 
@@ -156,6 +161,7 @@ def newfolder(request):
                                     is_uploaded=True)
         return MyResponse.SUCCESS(f.id)
     except:
+        log.warning(f"用户尝试新建文件夹失败，用户id：{request.user_id},{request.POST}")
         return MyResponse.ERROR("请求参数错误")
 
 
@@ -171,8 +177,8 @@ def usedStorage(request):
             used = 0
         total = gettotalSize(user_id)
         return MyResponse.SUCCESS({"used": used, "total": total})
-    except Exception as e:
-        print(e)
+    except:
+        log.warning(f"用户尝试获取已使用空间失败，用户id：{request.user_id}")
         return MyResponse.ERROR("请求参数错误")
 
 
@@ -185,8 +191,8 @@ def getPreviewKey(request):
         file_id = request.GET["file_id"]
         key = KV.newKey({"user_id": user_id, "file_id": file_id}, 60 * 60 * 24)
         return MyResponse.SUCCESS(key)
-    except Exception as e:
-        print(e)
+    except :
+        log.warning(f"用户尝试获取预览文件key失败，用户id：{request.user_id},{request.GET}")
         return MyResponse.ERROR("请求参数错误")
 
 
@@ -198,8 +204,8 @@ async def preview(request, k):
         user_id = s["user_id"]
         file_id = s["file_id"]
         return await preview_box(request, user_id, file_id, k)
-    except Exception as e:
-        print(e)
+    except:
+        log.warning(f"用户尝试预览文件失败，用户id：{request.user_id},{k}")
         return (
             render(request, 'urllose.html'))
 
@@ -213,8 +219,8 @@ async def data(request, k):
         k = s["user_id"]
         f = s["file_id"]
         return await all_preview(request, k, f)
-    except Exception as e:
-        print(e)
+    except :
+        log.warning(f"用户尝试预览文件内容失败，用户id：{request.user_id},{k}")
         return MyResponse.ERROR("参数错误")
 
 
@@ -238,8 +244,8 @@ async def poster(request, k):
             return FileResponse(open(settings.BASE_DIR / "static" / "img" / f'{file_type}.svg', 'rb'),
                                 filename=f'{file_type}.svg')
         return FileResponse(open(path, 'rb'), filename=f'{name}.png')
-    except Exception as e:
-        print("/file/poster， error", e)
+    except:
+        log.warning(f"用户尝试获取文件封面失败，用户id：{request.user_id},{k}")
         return FileResponse()
 
 

@@ -6,6 +6,7 @@ from django.shortcuts import render
 from account.models import User
 from file.models import FileUser
 from sharefile.models import ShareList
+from utils.CommonLog import log
 from utils.LoginCheck import LoginCheck
 from utils.MyResponse import MyResponse
 from utils.file import file_copy
@@ -16,22 +17,28 @@ from utils.randomString import random_string
 
 @LoginCheck
 def newShare(request):
-    user_id = request.user_id
-    file_id = request.POST['file_id']
-    end_time = request.POST['end_time']
-    pwd = request.POST['pwd']
-    if end_time == "":
-        end_time = None
-    else:
-        end_time = end_time + " 23:59:59"
-    user = User.objects.get(id=user_id)
-    file = FileUser.objects.get(id=file_id, user_id=user_id, is_delete=False, is_uploaded=True)
-    code = random_string(16)
-    while len(ShareList.objects.filter(share_code=code)) > 0:
+    if request.method != "POST":
+        return MyResponse.ERROR("请求方式错误")
+    try:
+        user_id = request.user_id
+        file_id = request.POST['file_id']
+        end_time = request.POST['end_time']
+        pwd = request.POST['pwd']
+        if end_time == "":
+            end_time = None
+        else:
+            end_time = end_time + " 23:59:59"
+        user = User.objects.get(id=user_id)
+        file = FileUser.objects.get(id=file_id, user_id=user_id, is_delete=False, is_uploaded=True)
         code = random_string(16)
-    obj = ShareList.objects.create(user=user, file=file, share_code=code, share_pwd=pwd, share_end_time=end_time)
+        while len(ShareList.objects.filter(share_code=code)) > 0:
+            code = random_string(16)
+        obj = ShareList.objects.create(user=user, file=file, share_code=code, share_pwd=pwd, share_end_time=end_time)
 
-    return MyResponse.SUCCESS({"share_code": obj.share_code, "end_time": obj.share_end_time, "pwd": obj.share_pwd})
+        return MyResponse.SUCCESS({"share_code": obj.share_code, "end_time": obj.share_end_time, "pwd": obj.share_pwd})
+    except:
+        log.warning(f"创建分享错误: {request.POST}")
+        return MyResponse.ERROR("分享失败")
 
 
 def getShare(request, code):
@@ -54,8 +61,8 @@ def getShare(request, code):
             "name": share.file.file_name,
             "link": link,
             "poster": f"../../api/file/poster/{code}"})
-    except Exception as e:
-        print("getShare:",e)
+    except :
+        log.warning(f"获取分享错误: {code}")
         return render(request, "share_lost.html")
 
 
@@ -91,7 +98,8 @@ def shareSave(request):
             return MyResponse.ERROR("空间不足")
         else:
             return MyResponse.ERROR("保存失败")
-    except:
+    except Exception as e:
+        log.warning(f"保存分享错误: {request.POST},{e}")
         return MyResponse.ERROR("保存失败")
 
 

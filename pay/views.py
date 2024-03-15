@@ -10,6 +10,7 @@ from django.utils.timezone import localtime
 
 from pay.models import UserOrders, Menu
 from sever import settings
+from utils.CommonLog import log
 from utils.LoginCheck import LoginCheck
 from utils.MyResponse import MyResponse
 from utils.aliPay import alipayConfig, alipayModel, check_pay, add_day, refundModel
@@ -37,6 +38,7 @@ def getInfo(request):
     if not menu_id:
         return MyResponse.ERROR("menu is required")
     try:
+        log.warning(f"套餐未找到：{menu_id}")
         menu = Menu.objects.get(id=menu_id)
     except:
         return MyResponse.ERROR("menu is not exist")
@@ -50,10 +52,12 @@ def pay(request):
     user_id = request.user_id
     menu_id = data.get("menu_id")
     if not menu_id:
+        log.warning(f"创建订单时，套餐未找到：{menu_id}")
         return MyResponse.ERROR("menu is required")
     try:
         menu = Menu.objects.get(id=menu_id)
     except:
+        log.warning(f"创建订单时，套餐未找到：{menu_id}")
         return MyResponse.ERROR("menu is not exist")
     order = UserOrders.objects.create(user_id=user_id, menu=menu)
     alipay_client_config = alipayConfig()
@@ -65,9 +69,11 @@ def pay(request):
     try:
         client = DefaultAlipayClient(alipay_client_config)
         response_content = client.page_execute(payrequest, http_method="GET")
-    except Exception as e:
-        return MyResponse.ERROR(str(e))
+    except :
+        log.warning(f"支付链接创建失败：{order.id}")
+        return MyResponse.ERROR("pay error")
     if not response_content:
+        log.warning(f"支付链接创建失败：{order.id}")
         return MyResponse.ERROR("pay error")
     else:
         valid_time = f'{menu.valid_time}天' if menu.valid_time != -1 else "永久有效"
@@ -93,6 +99,7 @@ def paysuccess(request):
             return MyResponse.SUCCESS(True)
         return MyResponse.SUCCESS(False)
     except:
+        log.warning(f"订单未找到：{order_id}, user_id:{request.user_id}")
         return MyResponse.ERROR("order is not exist")
 
 
@@ -124,17 +131,21 @@ def callback(request):
             try:
                 res = json.loads(res)
                 if res['msg'] == 'Success':
+                    log.warning(f"超出限购数量,退款成功：{order.id}")
                     order.refund = True
                 else:
+                    log.warning(f"超出限购数量,退款失败：{order.id}")
                     order.refund = False
             except:
+                log.warning(f"超出限购数量,退款失败：{order.id}")
                 order.refund = False
         else:
             order.is_valid = True
         order.call_back = str(params)
         order.save()
         return MyResponse.SUCCESS('success')
-    except Exception as e:
+    except :
+        log.warning(f"支付回调失败：{request.params}")
         return MyResponse.ERROR("error")
 
 
