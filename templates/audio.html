@@ -1,50 +1,42 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ name }}</title>
-</head>
-<style type="text/css">
-    html,
-    body {
-        width: 100%;
-        height: 100%;
-        background: white;
-        margin: auto;
-        overflow: hidden;
-    }
-    body {
-        background-color: rgb(1, 176, 173);
-        background-image: url('../../static/music-player.jpg');
-        background-repeat: no-repeat;
-        background-size: 2000px 1200px;
-    }
-    #mse {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-    }
-    #album {
-        height: 55%;
-        background-image: url('{{ poster  }}');
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: auto 300px;
-    }
-    #info {
-        font-size: 40px;
-        line-height: 40px;
-        width: 100%;
-        color: white;
-        text-align: center;
-    }
-</style>
-<body>
-<div id="album"></div>
-<div id="info">
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
     {{ name }}
-</div>
-<audio id="mse" src="{{ url }}" controls="controls" controlsList="nodownload noplaybackrate"></audio>
-</body>
-</html>
+{% endblock %}
+
+{% block mainbody %}
+    <style>
+        .container {
+            margin: auto;
+            padding: 50px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transform-origin: top center;
+        }
+
+        .file-info img {
+            cursor: pointer; /* 将鼠标光标改为手型 */
+            transition: transform 0.3s ease; /* 添加过渡效果 */
+            transform-origin: center center; /* 设置变换原点为图片中心 */
+        }
+
+        .file-info img:hover {
+            transform: scale(1.1); /* 鼠标悬停时放大图片 */
+        }
+
+        .mse {
+            width: 80%;
+        }
+    </style>
+
+    <div class="container">
+        <div class="file-info">
+            <img src="{{ poster }}" alt="{{ name }}" height="400" onclick="toggleZoom(this)">
+            <h2>{{ name }}</h2>
+            <audio class="mse" src="{{ url }}" controls="controls" controlsList="nodownload noplaybackrate"></audio>
+        </div>
+    </div>
+{% endblock %}
+

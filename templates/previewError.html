@@ -1,26 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>文件暂不支持预览</title>
-</head>
-<body>
-<h1>文件暂不支持预览</h1>
-<p>请下载后查看</p>
-</body>
-<style>
-    body {
-        text-align: center;
-    }
+{% extends "base.html" %}
+{% load static %}
 
-    h1 {
-        font-size: 24px;
-        color: #333;
-    }
+{% block title %}
+    文件暂不支持预览
+{% endblock %}
 
-    p {
-        font-size: 14px;
-        color: #666;
-    }
-</style>
-</html>
+{% block mainbody %}
+    <style>
+        .container {
+            width: 60%;
+            margin: auto;
+            padding: 50px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transform-origin: top center;
+        }
+
+    </style>
+    <div class="container">
+        <div >
+            <h2>文件暂不支持预览</h2>
+            <h3>请下载后查看</h3>
+        </div>
+    </div>
+
+{% endblock %}

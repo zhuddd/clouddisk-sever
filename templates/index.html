@@ -1,26 +1,23 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <meta charset="UTF-8">
-    <title>Cloud</title>
+{% extends "base.html" %}
+{% load static %}
+
+{% block mainbody %}
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
         .container {
             background-color: #fff;
             padding: 20px;
             border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
+
         h1, h2 {
             color: #333;
         }
+
         p {
             color: #666;
         }
+
         .download-button {
             display: inline-block;
             margin-top: 20px;
@@ -30,12 +27,11 @@
             text-decoration: none;
             border-radius: 5px;
         }
+
         .download-button:hover {
             background-color: #0056b3;
         }
     </style>
-</head>
-<body>
     <div class="container">
         <h1>欢迎来到Cloud</h1>
         <p>Cloud是一个文件存储和分享工具，主要功能包括：</p>
@@ -48,5 +44,4 @@
         </ul>
         <a href="/download" class="download-button">下载程序</a>
     </div>
-</body>
-</html>
+{% endblock %} 

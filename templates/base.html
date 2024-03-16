@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}Cloud{% endblock %}
+    </title>
+</head>
+<style>
+    body{
+        
+        background-color: #f1f1f1;
+    }
+    
+    .navigation {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: white;
+        border-radius: 15px;
+    }
+
+    .navigation li {
+        float: left;
+    }
+
+    .navigation li a {
+        display: block;
+        color: black;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .navigation li a:hover {
+        background-color: #a8a8a8;
+    }
+
+    .block {
+        padding: 60px;
+        min-height: 67vh;
+    }
+
+    .bottom, .bottom a {
+        color: black;
+        text-align: center;
+    }
+</style>
+<body>
+<ul class="navigation">
+    <li><a href="/">Home</a></li>
+</ul>
+    <div class="block">
+        {% block mainbody %}
+            <h1>Welcome</h1>
+        {% endblock %}
+
+    </div>
+    <p class="bottom">
+        <a href=https://beian.miit.gov.cn/shouye.html" target="_blank">蜀ICP备2024049173号</a>
+    </p>
+</body>
+</html>

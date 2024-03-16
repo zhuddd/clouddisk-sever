@@ -30,7 +30,7 @@ def index(request):
 
 
 def download(request):
-    return FileResponse(open(settings.BASE_DIR / "static" / "download_test", "rb"))
+    return FileResponse(open(settings.BASE_DIR / "static" / "cloud.zip", "rb"))
 
 
 

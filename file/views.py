@@ -1,7 +1,5 @@
 import os
-from datetime import datetime
 
-from asgiref.sync import sync_to_async
 from django.http import FileResponse
 from django.shortcuts import render
 
@@ -14,7 +12,7 @@ from utils.MyResponse import MyResponse
 from sever.settings import STATIC_FILES_DIR_FACE
 from utils.LoginCheck import LoginCheck
 from utils.file import file_copy, file_delete, getUsedStorage, gettotalSize
-from utils.filePreview import all_preview, preview_box, fileInfo
+from utils.filePreview import all_preview, preview_box
 
 
 @LoginCheck
@@ -60,7 +58,7 @@ def getface(request, k, t):
         else:
             return FileResponse()
     except:
-        log.waring(f"获取/生成文件封面失败，文件id：{k}")
+        log.warning(f"获取/生成文件封面失败，文件id：{k}")
         user_file.file_face = False
         user_file.save()
         return FileResponse()
@@ -191,7 +189,7 @@ def getPreviewKey(request):
         file_id = request.GET["file_id"]
         key = KV.newKey({"user_id": user_id, "file_id": file_id}, 60 * 60 * 24)
         return MyResponse.SUCCESS(key)
-    except :
+    except:
         log.warning(f"用户尝试获取预览文件key失败，用户id：{request.user_id},{request.GET}")
         return MyResponse.ERROR("请求参数错误")
 
@@ -205,7 +203,7 @@ async def preview(request, k):
         file_id = s["file_id"]
         return await preview_box(request, user_id, file_id, k)
     except:
-        log.warning(f"用户尝试预览文件失败，用户id：{request.user_id},{k}")
+        log.warning(f"用户尝试预览文件失败：{request.GET},{k}")
         return (
             render(request, 'urllose.html'))
 
@@ -219,39 +217,32 @@ async def data(request, k):
         k = s["user_id"]
         f = s["file_id"]
         return await all_preview(request, k, f)
-    except :
-        log.warning(f"用户尝试预览文件内容失败，用户id：{request.user_id},{k}")
+    except:
+        log.warning(f"用户尝试预览文件内容失败：{request.GET},{k}")
         return MyResponse.ERROR("参数错误")
 
 
-async def poster(request, k):
+def poster(request, k):
     try:
-        s = await sync_to_async(KV.getKey)(k)
+        s = KV.getKey(k)
         if s.get("user_id") is not None and s.get("file_id") is not None:
-            k = s["user_id"]
-            f = s["file_id"]
-            name, file_hash = await fileInfo(k, f)
+            file = FileUser.objects.get(user_id=s["user_id"], id=s["file_id"], is_delete=False, is_uploaded=True)
+            path = settings.STATIC_FILES_DIR_FACE / f'{file.file.hash}.preview'
+            if path.exists():
+                return FileResponse(open(path, 'rb'), filename=f'{file.file_name}.png')
         else:
-            share = await sync_to_async(ShareList.objects.get)(share_code=k, is_delete=False)
+            file = ShareList.objects.get(share_code=k, is_delete=False).file
             try:
-                file_hash = await sync_to_async(lambda: share.file.file.hash)()
+                file_hash = file.file.hash
             except:
                 file_hash = ""
-            name = share.file.file_name
-        path = settings.STATIC_FILES_DIR_FACE / f'{file_hash}.preview'
-        if not os.path.exists(path):
-            file_type = await sync_to_async(lambda: share.file.file_type)()
-            return FileResponse(open(settings.BASE_DIR / "static" / "img" / f'{file_type}.svg', 'rb'),
-                                filename=f'{file_type}.svg')
-        return FileResponse(open(path, 'rb'), filename=f'{name}.png')
-    except:
-        log.warning(f"用户尝试获取文件封面失败，用户id：{request.user_id},{k}")
+            name = file.file_name
+            path = settings.STATIC_FILES_DIR_FACE / f'{file_hash}.preview'
+            if os.path.exists(path):
+                return FileResponse(open(path, 'rb'), filename=f'{name}.png')
+        file_type = file.file_type
+        return FileResponse(open(settings.ICON_DIR / f'{file_type}.svg', 'rb'),
+                            filename=f'{file_type}.svg')
+    except Exception as e:
+        log.warning(f"用户尝试获取文件封面失败{request.GET},{k},{e}")
         return FileResponse()
-
-
-
-
-
-
-
-

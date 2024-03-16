@@ -5,7 +5,7 @@ from sever.settings import LOG_DIR
 
 
 class CommonLog:
-    def __init__(self, when='D', backupCount=30, console=True):
+    def __init__(self, when='midnight', backupCount=30, console=True):
         self.check_log_folder()
         formatter = logging.Formatter(
             fmt='%(asctime)s - %(levelname)s - %(module)s %(filename)s[%(lineno)d] : %(message)s',
@@ -78,4 +78,4 @@ class CommonLog:
                     (dir / level).mkdir()
 
 
-log = CommonLog("D", 30, False).log
+log = CommonLog(backupCount=30, console=False).log

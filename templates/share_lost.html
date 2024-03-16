@@ -1,13 +1,13 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <meta charset="UTF-8">
-    <title>链接已失效</title>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+分享链接失效
+{% endblock %}
+
+
+{% block mainbody %}
     <style>
-        body {
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
         .container {
             width: 60%;
             margin: auto;
@@ -15,14 +15,9 @@
             background-color: #fff;
             box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
             text-align: center;
+            transform-origin: top center;
         }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #666;
-        }
-        a {
+        .button {
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
@@ -31,16 +26,11 @@
             text-decoration: none;
             border-radius: 5px;
         }
-        a:hover {
-            background-color: #0056b3;
-        }
     </style>
-</head>
-<body>
     <div class="container">
-        <h1>分享链接已失效</h1>
-        <p>对不起，你访问的分享链接已经失效。</p>
-        <a href="/">返回首页</a>
+        <div >
+            <h2>分享链接失效</h2>
+            <a href="/" class="button">返回首页</a>
+        </div>
     </div>
-</body>
-</html>
+{% endblock %}

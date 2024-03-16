@@ -32,7 +32,7 @@ async def file_iterator_all(file_path, chunk_size=1024 * 1024 * 10):
             yield chunk
 
 
-async def fileInfo(user_id, file_id):
+async def syncfileInfo(user_id, file_id):
     """获取文件信息"""
     file_user = await sync_to_async(get_user_file_by_id)(user_id, file_id)
     if file_user is None:
@@ -46,16 +46,27 @@ async def fileInfo(user_id, file_id):
 
 
 async def preview_box(request: HttpRequest, user, file_id, k):
-    name, file_hash = await fileInfo(user, file_id)
+    name, file_hash = await syncfileInfo(user, file_id)
     if name is None or file_hash is None:
         return render(request, 'previewError.html')
     content_type, _ = mimetypes.guess_type(name)
+    print(content_type)
     if content_type is None:
         return render(request, 'previewError.html')
     type = content_type.split("/")[0]
-    if type in ("video", "audio","image"):
+    other_type = content_type.split("/")[1]
+    if type in ("video", "audio", "image"):
         return render(request,
                       f'{type}.html',
+                      {
+                          "url": f"../data/{k}",
+                          "type": content_type,
+                          "name": name,
+                          "poster": f"../api/file/poster/{k}"}
+                      )
+    elif other_type in ("pdf"):
+        return render(request,
+                      f'{other_type}.html',
                       {
                           "url": f"../data/{k}",
                           "type": content_type,
@@ -68,7 +79,7 @@ async def preview_box(request: HttpRequest, user, file_id, k):
 
 async def all_preview(request, user_id, file_id):
     """以流媒体的方式响应视频文件"""
-    name, file_hash = await fileInfo(user_id, file_id)
+    name, file_hash = await syncfileInfo(user_id, file_id)
     path = settings.STATIC_FILES_DIR_FILE / file_hash
     content_type, encoding = mimetypes.guess_type(name)
     if content_type is None:

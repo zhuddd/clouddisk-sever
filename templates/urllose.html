@@ -1,24 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>链接失效</title>
-</head>
-<body>
-<h1>链接失效</h1>
-</body>
-<style>
-    body {
-        text-align: center;
-    }
+{% extends "base.html" %}
+{% load static %}
 
-    h1 {
-        font-size: 24px;
-        color: #333;
-        margin-top: 200px;
-        
-        
-    }
+{% block title %}
+    链接失效
+{% endblock %}
 
-</style>
-</html>
+{% block mainbody %}
+    <style>
+        .container {
+            width: 60%;
+            margin: auto;
+            padding: 50px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transform-origin: top center;
+        }
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007BFF;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+    <div class="container">
+        <div >
+            <h2>链接失效</h2>
+            <a href="/" class="button">返回首页</a>
+        </div>
+    </div>
+
+{% endblock %}

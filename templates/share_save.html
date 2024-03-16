@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <meta charset="UTF-8">
-    <title>文件保存页面</title>
+{% extends "base.html" %}
+{% load static %}
+
+{% block mainbody %}
     <style>
-        body {
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
         .container {
             width: 60%;
             margin: auto;
@@ -22,7 +17,7 @@
         p {
             color: #666;
         }
-        a {
+        .save {
             display: inline-block;
             margin-top: 20px;
             padding: 10px 20px;
@@ -31,7 +26,7 @@
             text-decoration: none;
             border-radius: 5px;
         }
-        a:hover {
+        .save:hover {
             background-color: #0056b3;
         }
         form {
@@ -55,12 +50,10 @@
             background-color: #0056b3;
         }
     </style>
-</head>
 <body>
     <div class="container">
         {% if password_required %}
             <form method="POST">
-{#                {% csrf_token %}#}
                 <label for="password">请输入提取码:</label>
                 <input type="password" id="password" name="password">
                 <input type="submit" value="提交">
@@ -69,9 +62,9 @@
             <div class="file-info">
                 <img src="{{ poster }}" alt="文件封面" height="400">
                 <h2>{{ name }}</h2>
-                <a href="{{ link }}">打开客户端保存</a>
+                <a class="save" href="{{ link }}">打开客户端保存</a>
             </div>
         {% endif %}
     </div>
 </body>
-</html>
+{% endblock %}

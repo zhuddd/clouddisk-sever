@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    {{ mag }}
+    {{ name }}
 {% endblock %}
 
 {% block mainbody %}
@@ -16,21 +16,11 @@
             text-align: center;
             transform-origin: top center;
         }
-        .button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            color: #fff;
-            background-color: #007BFF;
-            text-decoration: none;
-            border-radius: 5px;
-        }
+
     </style>
     <div class="container">
-        <div class="file-info">
-            <h2>{{ msg }}</h2>
-            <a href="/" class="button">返回首页</a>
-        </div>
+        <h3>{{ name }}</h3>
+        <embed src="{{ url }}" type="application/pdf" width=800 height=800>
     </div>
 
 {% endblock %}

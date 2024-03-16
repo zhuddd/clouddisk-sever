@@ -1,21 +1,48 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ name }}</title>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {{ name }}
+{% endblock %}
+
+{% block mainbody %}
     <style>
-        #image {
-            display: block;
-            -webkit-user-select: none;
+
+        .container {
             margin: auto;
-            cursor: zoom-out;
-            background-color: hsl(0, 0%, 90%);
-            transition: background-color 300ms;
-            height: auto;
+            padding: 50px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transform-origin: top center;
+        }
+
+        .file-info img {
+            cursor: pointer; /* 将鼠标光标改为手型 */
+            transition: transform 0.3s ease; /* 添加过渡效果 */
+            transform-origin: center center; /* 设置变换原点为图片中心 */
+        }
+
+        .file-info img:hover {
+            transform: scale(1.1); /* 鼠标悬停时放大图片 */
         }
     </style>
-</head>
-<body>
-<img id="image" src="{{ url }}" alt="{{ name }}">
-</body>
-</html>
+
+    <div class="container">
+        <div class="file-info">
+            <img src="{{ url }}" alt="{{ name }}" height="400" onclick="toggleZoom(this)">
+            <h2>{{ name }}</h2>
+        </div>
+    </div>
+
+    <script>
+        function toggleZoom(img) {
+            if (img.style.transform === "scale(1.5)") {
+                img.style.transform = "scale(1)"; /* 如果已经放大了，再次点击则缩小 */
+            } else {
+                img.style.transform = "scale(1.5)"; /* 如果未放大，则放大图片 */
+
+            }
+        }
+    </script>
+{% endblock %}
