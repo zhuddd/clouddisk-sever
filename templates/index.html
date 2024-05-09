@@ -8,40 +8,148 @@
             padding: 20px;
             border-radius: 5px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            height: 1000px;
         }
 
-        h1, h2 {
+        .image {
+            position: absolute;
+            box-shadow: 20px 20px 20px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+            margin-left: 20px; /* 调整图片之间的间距 */
+        }
+
+        h1 {
             color: #333;
         }
 
-        p {
-            color: #666;
-        }
-
         .download-button {
-            display: inline-block;
+            position: relative;
+            width: 100px;
+            height: 60px;
+            left: 150px;
             margin-top: 20px;
             padding: 10px 20px;
             color: #fff;
-            background-color: #007BFF;
+            background-color: #6eb3ff;
             text-decoration: none;
-            border-radius: 5px;
+            text-align: center;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
         }
 
         .download-button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(96.15deg, #446dff 2.85%, rgba(99, 125, 255, .75) 100%), #ffffff;
+        }
+
+        .download-button-disabled {
+            position: relative;
+            width: 100px;
+            height: 60px;
+            left: 150px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #737373;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
+        }
+        /* 弹窗样式 */
+        .popup {
+            visibility: hidden;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            text-align: center;
+        }
+
+        .popup-show {
+            visibility: visible;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .home_black {
+            top: 20%;
+            left: 35%;
+            width: 700px;
+            height: auto
+        }
+
+        .home {
+            top: 55%;
+            left: 40%;
+            width: 700px;
+            height: auto
+        }
+
+        .login {
+            top: 90%;
+            left: 55%;
+            width: 400px;
+            height: auto
         }
     </style>
     <div class="container">
-        <h1>欢迎来到Cloud</h1>
-        <p>Cloud是一个文件存储和分享工具，主要功能包括：</p>
-        <ul>
-            <li>上传下载文件</li>
-            <li>多文件同时上传下载</li>
-            <li>支持断点续传</li>
-            <li>可查看部分文件封面</li>
-            <li>支持部分文件在线预览</li>
-        </ul>
-        <a href="/download" class="download-button">下载程序</a>
+        <h1>Cloud</h1>
+        <h1>安全、小巧、开放</h1>
+        <p style="color: #666;width: 30%;">
+            Cloud是一款速度快、不打扰、够安全、易于分享的网盘，你可以在这里存储、管理，尽情打造丰富的数字世界</p>
+        <img src="{% static 'home_black.png' %}" class="image home_black">
+        <img src="{% static 'home.png' %}" class="image home">
+        <img src="{% static 'login.png' %}" class="image login">
+
+        <a href="/download/win" class="download-button">Win</a><br>
+        <a href="#" class="download-button-disabled popup-trigger" data-popup="popup">Mac</a><br>
+        <a href="#" class="download-button-disabled popup-trigger" data-popup="popup">Android</a><br>
+        <a href="#" class="download-button-disabled popup-trigger" data-popup="popup">iOS</a><br>
+
+        <!-- 弹窗 -->
+        <div class="popup" id="popup">
+            <div class="popup-content">
+                <p style="color: aliceblue">暂不支持</p>
+            </div>
+        </div>
     </div>
-{% endblock %} 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // 弹窗触发器
+            var triggers = document.querySelectorAll('.popup-trigger');
+
+            triggers.forEach(function (trigger) {
+                var popupId = trigger.getAttribute('data-popup');
+                var popup = document.getElementById(popupId);
+
+                trigger.addEventListener('click', function () {
+                    popup.classList.add('popup-show');
+                    setTimeout(function () {
+                        popup.classList.remove('popup-show');
+                    }, 1500); // 2秒后自动关闭
+                });
+            });
+
+        });
+    </script>
+{% endblock %}

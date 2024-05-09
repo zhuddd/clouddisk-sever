@@ -9,4 +9,5 @@ urlpatterns = [
     path('callback', views.callback),
     path('admin', views.admin),
     path('income', views.income),
+    path('history', views.history),
     ]

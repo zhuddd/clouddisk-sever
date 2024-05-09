@@ -50,12 +50,12 @@ async def preview_box(request: HttpRequest, user, file_id, k):
     if name is None or file_hash is None:
         return render(request, 'previewError.html')
     content_type, _ = mimetypes.guess_type(name)
-    print(content_type)
+    print(content_type,_,name)
     if content_type is None:
         return render(request, 'previewError.html')
     type = content_type.split("/")[0]
     other_type = content_type.split("/")[1]
-    if type in ("video", "audio", "image"):
+    if type in ("video", "audio", "image","text"):
         return render(request,
                       f'{type}.html',
                       {
@@ -84,7 +84,8 @@ async def all_preview(request, user_id, file_id):
     content_type, encoding = mimetypes.guess_type(name)
     if content_type is None:
         return render(request, 'previewError.html')
-
+    if content_type.split("/")[0] in ("text", ):
+        content_type = "text/plain"
     # 处理请求中的范围头信息
     range_header = request.META.get('HTTP_RANGE', '').strip()
     range_re = re.compile(r'bytes\s*=\s*(\d+)\s*-\s*(\d*)', re.I)
@@ -110,5 +111,5 @@ async def all_preview(request, user_id, file_id):
         resp = FileResponse(open(path, "rb"), content_type=content_type)
         resp['Content-Length'] = str(size)
     resp['Accept-Ranges'] = 'bytes'
-    resp['Content-Disposition'] = f'attachment; filename="{name}"'
+    # resp['Content-Disposition'] = f'attachment; filename="{name}"'
     return resp

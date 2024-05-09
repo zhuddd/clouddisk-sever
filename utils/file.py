@@ -55,11 +55,12 @@ def check_file(file_hash):
     """
     path = settings.STATIC_FILES_DIR_FILE / file_hash
     if os.path.exists(path):
+        import hashlib
+        m = hashlib.sha256()
         with open(path, 'rb') as f:
-            import hashlib
-            m = hashlib.sha256()
-            m.update(f.read())
-            return m.hexdigest() == file_hash
+            for chunk in iter(lambda: f.read(1024*1024), b''):
+                m.update(chunk)
+        return m.hexdigest() == file_hash
     return False
 
 
@@ -168,11 +169,10 @@ def getUsedStorage(user_id):
 
 
 def gettotalSize(user_id):
-    from account.models import User
     from datetime import datetime
     try:
         now = datetime.now()
-        default = User.objects.get(id=user_id).total_size
+        default = settings.BASE_STORAGE_SIZE
         orders = UserOrders.objects.filter(user_id=user_id, is_pay=True, valid_time__gte=now, is_valid=True)
         for i in orders:
             default += i.menu.storage_size * i.menu.storage_unit

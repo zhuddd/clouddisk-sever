@@ -13,6 +13,7 @@ from sever import settings
 from utils.CommonLog import log
 from utils.LoginCheck import LoginCheck
 from utils.MyResponse import MyResponse
+from utils.account import get_user_by_session
 from utils.aliPay import alipayConfig, alipayModel, check_pay, add_day, refundModel
 
 
@@ -102,6 +103,19 @@ def paysuccess(request):
         log.warning(f"订单未找到：{order_id}, user_id:{request.user_id}")
         return MyResponse.ERROR("order is not exist")
 
+def history(request):
+    k=request.GET.get('k')
+    if not k:
+        return render(request, "404.html")
+    user_id=get_user_by_session(k)
+    if not user_id:
+        return render(request, "404.html")
+    items=UserOrders.objects.filter(user_id=user_id).order_by('-order_time')
+    for i in range(len(items)):
+        items[i].is_pay = '已支付' if items[i].is_pay else '未支付'
+        items[i].is_valid = '有效' if items[i].is_valid else ('无效(已退款)' if items[i].refund else '无效(未退款)')
+        items[i].menu.price = f'{float(items[i].menu.price) / 100:.2f}元'
+    return render(request, "pay_history.html",{'items':items})
 
 def callback(request):
     try:

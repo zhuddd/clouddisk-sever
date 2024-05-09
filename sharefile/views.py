@@ -47,7 +47,8 @@ def getShare(request, code):
         share = ShareList.objects.get(Q(share_end_time__gt=datetime.now()) | Q(share_end_time=None),
                                       share_code=code,
                                       is_delete=False)
-
+        if share.file.is_delete:
+            return render(request, "share_lost.html", {"msg": "--文件已删除"})
         password = ""
         if share.share_pwd is not None and share.share_pwd != "":
             if request.method == "GET":

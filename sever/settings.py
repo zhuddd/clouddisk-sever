@@ -26,7 +26,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 1024*1024*1024
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["cloud.zhuddd.icu", "127.0.0.1", "192.168.1.8"]
+ALLOWED_HOSTS = ["cloud.zhuddd.icu", "127.0.0.1", "192.168.1.8","localhost"]
 INTERNAL_IPS = [
     # ...
     '127.0.0.1',
@@ -160,7 +160,7 @@ LOG_DIR = BASE_DIR.parent / "logs"
 
 
 FILE_CHECK_LENGTH = 1024  # 文件检查长度
-
+BASE_STORAGE_SIZE = 1024 * 1024 * 1024 * 10  # 基础空间大小
 ## 解码器目录
 FFMPEF_PATH = r"D:\毕业设计\sever\utils\ffmpeg"
 
@@ -172,7 +172,7 @@ ALIPAYPUBLICKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgXvYmNiExfeBh0eXO
 APP_ID = "9021000122694907"
 
 ##管理界面配置
-SIMPLEUI_HOME_PAGE="127.0.0.1/api/pay/admin"
+SIMPLEUI_HOME_PAGE="/api/pay/admin"
 SIMPLEUI_HOME_TITLE = 'Cloud'
 SIMPLEUI_HOME_INFO = False
 SIMPLEUI_ICON = {

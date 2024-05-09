@@ -17,3 +17,4 @@ class MyAdmin(admin.ModelAdmin):
     list_display = ("id","trade_no", "user", "menu", "order_time", "is_pay", "pay_time", "valid_time", "is_valid", "is_delete","refund")
     search_fields = ("id","trade_no", "user", "menu","refund")
     list_filter = ("is_pay", "valid_time", "is_valid", "is_delete","refund")
+    readonly_fields=("id","trade_no", "user", "menu", "order_time", "pay_time", "valid_time","call_back")

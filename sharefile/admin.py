@@ -8,3 +8,4 @@ from sharefile.models import ShareList
 class MyAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "file", "share_code", "share_pwd", "share_time", "share_end_time", "is_delete")
     search_fields = ("id", "user__id", "file__id", "share_code", "share_pwd")
+    readonly_fields=("id", "user", "file", "share_code", "share_pwd", "share_time", "share_end_time")

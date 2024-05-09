@@ -29,8 +29,8 @@ def index(request):
     return render(request, "index.html")
 
 
-def download(request):
-    return FileResponse(open(settings.BASE_DIR / "static" / "cloud.zip", "rb"))
+def download(request,k):
+    return FileResponse(open(settings.BASE_DIR / "static" / f"cloud-{k}.zip", "rb"))
 
 
 
@@ -39,7 +39,7 @@ def download(request):
 urlpatterns = [
     path("", index),
     path("index", index),
-    path("download", download),
+    path("download/<str:k>", download),
     path(r'mdeditor/', include('mdeditor.urls')),
     path("admin/", admin.site.urls),
     path("api/account/", include("account.urls")),

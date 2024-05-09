@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -7,18 +9,27 @@
     </title>
 </head>
 <style>
-    body{
-        
-        background-color: #f1f1f1;
+    body {
+        background-image: linear-gradient(to top, #ffffff 1%,
+        rgba(255, 255, 255, 0) 17%),
+        linear-gradient(to right,
+                rgba(125, 113, 255, .18) -2%,
+                rgba(148, 174, 255, .18) 30%,
+                rgba(143, 255, 253, .18) 101%
+        );
     }
-    
+
     .navigation {
+        position: fixed;
+        z-index: 9999;
+        width: 99%;
         list-style-type: none;
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background-color: white;
+        background-color: #fdfdfd;
         border-radius: 15px;
+        box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.1);
     }
 
     .navigation li {
@@ -48,18 +59,21 @@
         text-align: center;
     }
 </style>
+<link rel="icon" href='{% static "logo.svg" %}'>
 <body>
 <ul class="navigation">
-    <li><a href="/">Home</a></li>
+    <li><a href="/"><img src='{% static "logo.svg" %}' style="width: 20px; height: auto"/> Home</a></li>
+    {% block head %}
+    {% endblock %}
 </ul>
-    <div class="block">
-        {% block mainbody %}
-            <h1>Welcome</h1>
-        {% endblock %}
+<div class="block">
+    {% block mainbody %}
+        <h1>Welcome</h1>
+    {% endblock %}
 
-    </div>
-    <p class="bottom">
-        <a href=https://beian.miit.gov.cn/shouye.html" target="_blank">蜀ICP备2024049173号</a>
-    </p>
+</div>
+<p class="bottom">
+    <a href=https://beian.miit.gov.cn/shouye.html" target="_blank">蜀ICP备2024049173号</a>
+</p>
 </body>
 </html>

@@ -31,67 +31,99 @@ def creat_contents(request):
         log.warning(f"创建上传文件夹失败:{e}，userid:{user_id}，{request.POST}")
         return MyResponse.ERROR("参数错误2")
 
+
+def validate_request_params(metadata_dict):
+    required_keys = ['HTTP_SIZE', 'HTTP_HASH', 'HTTP_CHECKHASH', 'HTTP_FID']
+    for key in required_keys:
+        if metadata_dict.get(key) is None:
+            return False
+    return True
+
+def check_user_space(user_id, file_size):
+    used_size = getUsedStorage(user_id)
+    total_size = gettotalSize(user_id)
+    return used_size + file_size <= total_size
+
+def handle_file_upload(upload_file, file_model, user_file, metadata_dict):
+    start_byte = int(metadata_dict.get('HTTP_STARTBYTE', 0))
+    chunk_hash = metadata_dict.get('HTTP_CHUNKHASH')
+    file_path = (settings.STATIC_FILES_DIR_FILE / file_model.hash).absolute()
+    mode = 'wb' if start_byte == 0 else 'ab'
+
+    # Check chunk hash
+    if chunk_hash != get_file_hash_file(upload_file):
+        return MyResponse.ERROR("文件损坏")
+
+    # Write file chunk
+    with open(file_path, mode) as destination:
+        destination.seek(start_byte)
+        destination.write(upload_file)
+
+    # Update file model and user file
+    file_model.upload_size = os.path.getsize(file_path)
+    file_model.save()
+    if file_model.upload_size == file_model.size:
+        file_model.broken = not check_file(file_model.hash)
+        file_model.save()
+        if not file_model.broken:
+            user_file.file = file_model
+            user_file.is_uploaded = True
+            user_file.save()
+            return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "文件已保存", "next": False})
+        else:
+            return MyResponse.SUCCESS({"upload_size": 0, "message": "文件损坏，请重新上传", "next": True})
+
+    return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "上传成功，准备下一块", "next": True})
+
 @LoginCheck
 def upload_view(request):
     try:
         if request.method != "POST":
             return MyResponse.ERROR("请求方式错误")
+
         metadata_dict = request.META
-        # print(metadata_dict)
         upload_file = request.body
         user_id = request.user_id
-        # user_id = 2
-        file_size = metadata_dict.get('HTTP_SIZE')
+        file_size = int(metadata_dict.get('HTTP_SIZE', 0))
         file_hash = metadata_dict.get('HTTP_HASH')
         file_check_hash = metadata_dict.get('HTTP_CHECKHASH')
         file_id = metadata_dict.get('HTTP_FID')
-        if file_size is None or file_hash is None or file_check_hash is None or file_id is None:
-            return MyResponse.ERROR("参数错误1")
-        # 检查空间是否足够
-        usedSize = getUsedStorage(user_id)
-        totalSize = gettotalSize(user_id)
-        if usedSize + int(file_size) > totalSize:
+
+        if not validate_request_params(metadata_dict):
+            return MyResponse.ERROR("参数错误")
+
+        if not check_user_space(user_id, file_size):
             return MyResponse.ERROR("空间不足")
-        # 检查文件上传起始点
+
         file_model = get_file_from_model(file_hash, file_check_hash, file_size)
-        user_file = FileUser.objects.filter(id=file_id, user_id=user_id, is_delete=False)
-        if len(user_file) == 0:
+        user_file = FileUser.objects.filter(id=file_id, user_id=user_id, is_delete=False).first()
+
+        if not user_file:
             return MyResponse.ERROR("fid错误")
-        user_file = user_file[0]
-        if upload_file is None or len(upload_file) == 0:
-            file_model.broken = not check_file(file_hash)
-            file_model.save()
+
+        if not upload_file:
             if not file_model.broken:
                 user_file.file = file_model
                 user_file.is_uploaded = True
                 user_file.save()
                 return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "文件已保存", "next": False})
-            return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "查询成功", "next": True})
-        # 上传文件
-        start_byte = int(metadata_dict.get('HTTP_STARTBYTE'))
-        chunk_hash = metadata_dict.get('HTTP_CHUNKHASH')
-        if start_byte is None or not chunk_hash:
-            return MyResponse.ERROR("参数错误2")
-        file_path = (settings.STATIC_FILES_DIR_FILE / file_hash).absolute()  # 更改文件保存路径
-        mode = 'wb' if start_byte == 0 else 'ab'  # 如果文件不存在则创建新文件，存在则以追加模式续写
-        if chunk_hash != get_file_hash_file(upload_file):
-            return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "文件损坏", "next": True})
-        with open(file_path, mode) as destination:
-            if upload_file:
-                # 移动文件指针到指定位置开始写入
-                destination.seek(start_byte)
-                destination.write(upload_file)
-        size = os.path.getsize(file_path)
-        file_model.upload_size = size
-        file_model.broken=not check_file(file_hash)
-        file_model.save()
-        # 检查文件是否存在
-        if not file_model.broken:
-            user_file.file = file_model
-            user_file.is_uploaded = True
-            user_file.save()
-            return MyResponse.SUCCESS({"upload_size": file_model.upload_size,"message": "文件已保存",  "next": False})
-        return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "上传成功,准备下一块", "next": True})
+            else:
+                if file_model.upload_size == file_model.size:
+                    file_model.broken = not check_file(file_hash)
+                    file_model.save()
+                    if not file_model.broken:
+                        user_file.file = file_model
+                        user_file.is_uploaded = True
+                        user_file.save()
+                        return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "文件已保存", "next": False})
+                    else:
+                        return MyResponse.SUCCESS({"upload_size": 0, "message": "文件损坏，请重新上传", "next": True})
+                else:
+                    return MyResponse.SUCCESS({"upload_size": file_model.upload_size, "message": "查找成功", "next": True})
+        else:
+            return handle_file_upload(upload_file, file_model, user_file, metadata_dict)
+
     except Exception as e:
-        log.warning(f"上传文件失败:{e}，userid:{request.user_id}，{request.POST}")
-        return MyResponse.ERROR("参数错误3")
+        log.warning(f"上传文件失败: {e}，userid: {request.user_id}，{request.POST}")
+        return MyResponse.ERROR("上传失败")
+
