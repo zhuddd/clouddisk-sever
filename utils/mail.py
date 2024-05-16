@@ -8,7 +8,7 @@ from future.backports.email.mime.text import MIMEText
 from future.backports.email.utils import COMMASPACE, formatdate
 
 # https://blog.csdn.net/cheng9587/article/details/110221232  配置教程
-def send_mail(mail_to, mail_from, subject, text, files=[], server="localhost", subtype='plain'):
+def send_mail2(mail_to, mail_from, subject, text, files=[], server="localhost", subtype='plain'):
     assert type(mail_to) == list
     assert type(files) == list
 

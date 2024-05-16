@@ -2,11 +2,12 @@ import datetime
 import random
 
 from account.models import Captcha
+from sever.settings import DEFAULT_FROM_EMAIL
 from utils.CommonLog import log
 from utils.account import *
 
 from utils.MyResponse import MyResponse
-from utils.mail import send_mail
+from utils.mail import send_mail2
 
 
 def login(request):
@@ -97,13 +98,24 @@ def get_captcha(request):
         captchaobj.send_time = t
         captchaobj.save()
 
-    send_mail([mail],
-              'Account',
-              f'验证码',
-              f'您的验证码是:{code}，10分钟内有效。\n\n '
-              f'如非本人操作，请忽略本邮件。\n\n '
-              f'本邮件由系统自动发出，请勿直接回复！\n\n'
+    # send_mail2([mail],
+    #           'Account',
+    #           f'验证码',
+    #           f'您的验证码是:{code}，10分钟内有效。\n\n '
+    #           f'如非本人操作，请忽略本邮件。\n\n '
+    #           f'本邮件由系统自动发出，请勿直接回复！\n\n'
+    #           f'{t.strftime("%Y-%m-%d %H:%M:%S")}'
+    #           )
+
+    from django.core.mail import send_mail
+
+    subject = '[Cloud] 验证码'
+    message = f'您的验证码是:{code}，10分钟内有效。\n\n ' \
+              f'如非本人操作，请忽略本邮件。\n\n ' \
+              f'本邮件由系统自动发出，请勿直接回复！\n\n' \
               f'{t.strftime("%Y-%m-%d %H:%M:%S")}'
-              )
+
+    send_mail(subject, message, "Account", [mail])
+
     log.info(f"将验证码发送至 {mail} code:{code}")
     return MyResponse.SUCCESS("ok")

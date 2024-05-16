@@ -158,11 +158,20 @@ STATIC_FILES_DIR_FILE = STATIC_FILES_DIR / "files"
 ICON_DIR = BASE_DIR/"static" / "icon"
 LOG_DIR = BASE_DIR.parent / "logs"
 
-
 FILE_CHECK_LENGTH = 1024  # 文件检查长度
 BASE_STORAGE_SIZE = 1024 * 1024 * 1024 * 10  # 基础空间大小
 ## 解码器目录
 FFMPEF_PATH = r"D:\毕业设计\sever\utils\ffmpeg"
+##邮件配置
+# 邮件后端
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# SMTP服务器
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
+# 发送邮件的地址
+DEFAULT_FROM_EMAIL = 'Cloud'
+
+
 
 ## 支付宝配置
 ALIPAYSEVER = "https://openapi-sandbox.dl.alipaydev.com/gateway.do"
